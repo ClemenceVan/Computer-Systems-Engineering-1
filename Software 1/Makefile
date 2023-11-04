@@ -1,7 +1,7 @@
 MAINFILE = SW1
 SRCS = *.c
 OBJS =
-CFLAGS = -std=gnu99 -Wall -Wextra
+CFLAGS = -std=gnu99 -Wall -Wextra# -Werror
 LFLAGS = -lm
 
 all: $(MAINFILE)
