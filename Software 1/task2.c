@@ -130,7 +130,7 @@ double variance_magnitude() {
     double avg = average_magnitude();
     double sum = 0;
     for (int i = 0; i < 100; i++)
-        sum += pow(magnitude(nbr[i]) - avg, 2);
+        sum += (magnitude(nbr[i]) - avg) * (magnitude(nbr[i]) - avg);
     return sum / 100;
 }
 
