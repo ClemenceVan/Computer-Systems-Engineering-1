@@ -7,7 +7,7 @@
 
 typedef struct databus_s {
 	int dir;
-	int databus_pins[];
+	int databus_pins[8];
 } databus;
 
 databus display = {
@@ -21,9 +21,24 @@ void SetDir(databus db, int dir) {
 
 void SetBusAsOutput(databus db, int value) {
 	unsigned int* address = value ? AT91C_PIOD_OER : AT91C_PIOD_ODR;
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < 8; i++)
 		*address = (1 << db.databus_pins[i]);
-	}
+}
+
+unsigned char ReadDatabus(databus db) {
+	unsigned char temp = 0;
+	for (int i = 0; i < 8; i++)
+		temp |= (*AT91C_PIOC_PDSR & (1 << db.databus_pins[i])) << i;
+	return temp;
+}
+
+void SetDatabus(databus db, unsigned char value) {
+	for (int i = 0; i < 8; i++) {
+		if ((value >> (7 - i)) & 1)
+			*AT91C_PIOC_SODR = (1 << db.databus_pins[i]);
+		else
+			*AT91C_PIOC_CODR = (1 << db.databus_pins[i]);
+    }
 }
 
 int pollPanel() {
@@ -38,10 +53,9 @@ int pollPanel() {
 		*AT91C_PIOC_CODR = (1 << (col + 7));
 		// Loop Row
 		for(int row = 0; row < 4; row++) {
-			// Read row and check if bit is zero             
+			// Read row and check if bit is zero
 			if((*AT91C_PIOC_PDSR & (1 << (row + 3))) == 0) {
 				value = row * 3 + col + 1;
-       			printf("%d\n", value);
 				return value;
 			}
 		}
@@ -69,25 +83,118 @@ void Delay(int value) {
 
 unsigned char Read_Status_Display(void) {
 	unsigned char temp;
-
 	// make databus as input
 	SetBusAsOutput(display, 0);
 	// Set dir as input (74chip, 1 = input)
 	SetDir(display, 1);
-	// Clear/enable output (74chip 0 = enable)
+	// Clear/enable output (74chip 0 = enable) // check about pin 48
+	*AT91C_PIOC_CODR = 1<<15;
 	// Set C/D
+	*AT91C_PIOC_SODR = 1<<14;
 	// Clear chip select display
+	*AT91C_PIOC_CODR = 1<<17;
 	// Clear read display
+	*AT91C_PIOC_CODR = 1<<16;
 	// Make a Delay
+	Delay(10);
 	// Read data bus and save it in temp
+	temp = ReadDatabus(display);
 	// Set chip select display
+	*AT91C_PIOC_SODR = 1<<17;
 	// Set read display
+	*AT91C_PIOC_SODR = 1<<16;
 	// Disable output (74chip)
 	SetBusAsOutput(display, 1);
 	// Set dir as output (74chip)
 	SetDir(display, 0);
 	// Return (Temp)
-} 
+	return temp;
+}
+
+void Write_Command_2_Display(unsigned char Command) {
+	// Wait until Read_Status_Display returns an OK
+	while ((Read_Status_Display() & 3) != 3) asm("nop");
+	// Clear databus
+	SetDatabus(display, 0);
+	// Set Command to databus
+	SetDatabus(display, Command);
+	// Set dir as output (74chip)
+	SetBusAsOutput(display, 1);
+	// Enable output (74chip)
+	*AT91C_PIOC_CODR = 1<<15;
+	// Set databus as output
+	SetBusAsOutput(display, 1);
+	// Set C/D signal High (1 = Command)
+	*AT91C_PIOC_SODR = 1<<14;
+	// Clear chip select display
+	*AT91C_PIOC_CODR = 1<<15;
+	// Clear write display
+	*AT91C_PIOC_CODR = 1<<17;
+	// Make a Delay
+	Delay(10);
+	// Set chip enable display
+	*AT91C_PIOC_SODR = 1<<17;
+	// Set write display
+	*AT91C_PIOC_SODR = 1<<16;
+	// Disable output (74chip)
+	*AT91C_PIOC_SODR = 1<<15;
+	// Make databus as input 
+	SetBusAsOutput(display, 0);
+}
+
+void Write_Data_2_Display(unsigned char Data) {
+	// Wait until Read_Status_Display returns an OK
+	while ((Read_Status_Display() & 3) != 3) asm("nop");
+	// Clear databus
+	SetDatabus(display, 0);
+	// Set Data to databus
+	SetDatabus(display, Data);
+	// Set dir as output (74chip)
+	SetBusAsOutput(display, 1);
+	// Enable output (74chip)
+	*AT91C_PIOC_CODR = 1<<15;
+	// Set databus as output
+	SetBusAsOutput(display, 1);
+	// Clear C/D signal High (0 = Data)
+	*AT91C_PIOC_CODR = 1<<14;
+	// Clear chip select display
+	*AT91C_PIOC_CODR = 1<<15;
+	// Clear write display
+	*AT91C_PIOC_CODR = 1<<17;
+	// Make a Delay
+	Delay(10);
+	// Set chip enable display
+	*AT91C_PIOC_SODR = 1<<17;
+	// Set write display
+	*AT91C_PIOC_SODR = 1<<16;
+	// Disable output (74chip)
+	*AT91C_PIOC_SODR = 1<<15;
+	// Make databus as input 
+	SetBusAsOutput(display, 0);
+}
+
+void Init_Display(void) {
+	// Clear Reset display
+	*AT91C_PIOD_CODR = 1<<0;
+	// Make a Delay
+	Delay(10);
+	// Set Reset display
+	*AT91C_PIOD_SODR = 1<<0;
+	Write_Data_2_Display(0x00);
+	Write_Data_2_Display(0x00);
+	Write_Command_2_Display(0x40);//Set text home address
+	Write_Data_2_Display(0x00);
+	Write_Data_2_Display(0x40);
+	Write_Command_2_Display(0x42); //Set graphic home address
+	Write_Data_2_Display(0x1e);
+	Write_Data_2_Display(0x00);
+	Write_Command_2_Display(0x41); // Set text area
+	Write_Data_2_Display(0x1e);
+	Write_Data_2_Display(0x00);
+	Write_Command_2_Display(0x43); // Set graphic area
+	Write_Command_2_Display(0x80); // text mode
+	Write_Command_2_Display(0x94); // Text on graphic off
+}
 
 void main(void) {
     SystemInit();
