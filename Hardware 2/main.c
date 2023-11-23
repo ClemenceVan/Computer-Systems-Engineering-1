@@ -196,6 +196,13 @@ void Init_Display(void) {
 	Write_Command_2_Display(0x94); // Text on graphic off
 }
 
+void DisplayPrintf(char* string, va_list args) {
+	char buffer[256];
+	vsprintf(buffer, string, args);
+	for (int i = 0; buffer[i] != '\0'; i++)
+		Write_Data_2_Display(buffer[i] - 0x20); // idk how that works its 03:27 and it made sense
+}
+
 void main(void) {
     SystemInit();
 
@@ -207,10 +214,10 @@ void main(void) {
 	*AT91C_PIOD_PER = (1 << 2);
 	*AT91C_PIOD_OER = (1 << 2);
 
-    while(1){
-		pollPanel();
-    //   ReadButton(&buttonVal);
-    //   SetLed(buttonVal);
+	Init_Display();
+
+    while(1) {
+		DisplayPrintf("%d", pollPanel());
     }
 }
 
