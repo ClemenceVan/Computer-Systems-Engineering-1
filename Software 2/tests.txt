@@ -1,0 +1,120 @@
+Test cases for each functions :
+1.a) insertFirst 
+
+int main() {
+    element el1 = {1, 1.1, NULL};
+    element el2 = {2, 2.2, NULL};
+    struct LinkedList *first = NULL;
+    insertFirst(&first, el1);
+    printf("%d\n", first->id); // should print 1
+    insertFirst(&first, el2);
+    printf("%d\n", first->id); // should print 2
+}
+
+1.b) isMember
+
+int main() {
+    element el1 = {1, 1.1, NULL};
+    element el2 = {2, 2.2, NULL};
+    element el3 = {2, 2.2, NULL};
+    struct LinkedList *first = NULL;
+    insertFirst(&first, el1);
+    insertFirst(&first, el2);
+    printf("%d\n", isMember(first, el1)); // should print 1
+    printf("%d\n", isMember(first, el2)); // should print 1
+    printf("%d\n", isMember(first, el3)); // should print 0
+}
+
+1.c) printList
+
+int main() {
+    element el1 = {1, 1.1, NULL};
+    element el2 = {2, 2.2, NULL};
+    element el3 = {3, 3.3, NULL};
+    struct LinkedList *first = NULL;
+    insertFirst(&first, el1);
+    insertFirst(&first, el2);
+    insertFirst(&first, el3);
+    printList(first); // should all elements in right order
+}
+
+1.d) removeElement ("remove" function already defined in libC header files, so we use "removeElement" instead)
+
+We test removeElement where element can be first, middle or last element in the list.
+
+int main() {
+    element el1 = {1, 1.1, NULL};
+    element el2 = {2, 2.2, NULL};
+    element el3 = {3, 3.3, NULL};
+    element el4 = {4, 4.4, NULL};
+    struct LinkedList *first = NULL;
+    insertFirst(&first, el1);
+    insertFirst(&first, el2);
+    insertFirst(&first, el3);
+    insertFirst(&first, el4);
+    // remove first element
+    removeElement(&first, el1);
+    printList(first); // should print 2, 3, 4
+    // remove middle element
+    removeElement(&first, el3);
+    printList(first); // should print 2, 4
+    // remove last element
+    removeElement(&first, el4);
+    printList(first); // should print 2
+    printf("%d\n", el1.id); // should print 1, proving that el1 is not deleted
+}
+
+2) readSensor
+
+We prove that the function works by printing the values of the sensor.
+Running the program multiple times proves the random nature of the values.
+
+int main() {
+    srand(time(NULL)); // random seed
+    struct LinkedList *first = NULL;
+
+    insertFirst(&first, readSensor(2));
+    insertFirst(&first, readSensor(3));
+    insertFirst(&first, readSensor(4));
+    insertFirst(&first, readSensor(5));
+
+    printList(first);
+    return 0;
+}
+
+3) sortLinkedList
+
+We use an algorithm where we remove the biggest element from the first list and insert at the head of a new sorted list.
+We do this until the first list is empty.
+We run the program several times to prove the sorting works on the random values.
+
+int main() {
+    srand(time(NULL));
+    struct LinkedList *first = NULL;
+    insertFirst(&first, readSensor(2));
+    insertFirst(&first, readSensor(3));
+    insertFirst(&first, readSensor(4));
+    insertFirst(&first, readSensor(5));
+    printList(first); // print initial random unsorted list
+    sortLinkedList(&first);
+    printList(first); // print sorted list for comparison
+    return 0;
+}
+
+4) freeLinkedList
+
+We initialize a list before freeing it and then print it to prove that it is empty.
+We run the program using valgrind to prove that there are no memory leaks and all allocated memory is freed.
+
+int main() {
+    srand(time(NULL));
+    struct LinkedList *first = NULL;
+    insertFirst(&first, readSensor(2));
+    insertFirst(&first, readSensor(3));
+    insertFirst(&first, readSensor(4));
+    insertFirst(&first, readSensor(5));
+    printList(first); // print initial random list
+    freeLinkedList(&first)
+    printList(first); // doesnt print anything, proving that the list is empty
+    return 0;
+}

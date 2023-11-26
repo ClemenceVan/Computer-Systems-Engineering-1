@@ -84,6 +84,7 @@ int main() {
     // element el1 = {1, 1.1, NULL};
     struct LinkedList *first = NULL;
     insertFirst(&first, readSensor(1));
+    printf("%d\n", first->id);
     insertFirst(&first, readSensor(2));
     insertFirst(&first, readSensor(3));
     insertFirst(&first, readSensor(4));
@@ -94,5 +95,7 @@ int main() {
     printf("\n\n");
     printList(first);
     freeLinkedList(&first);
+    printf("\n\n");
+    printList(first);
     return 0;
 }
