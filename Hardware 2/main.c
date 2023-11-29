@@ -60,7 +60,7 @@ void SetDatabus(databus db, unsigned char value) {
     // 	}
 	// }
 	// *AT91C_PIOC_SODR = value << 2;
-	*AT91C_PIOC_CODR |= ((~value) << 2);
+	*AT91C_PIOC_CODR |= (0xFF << 2);
 	*AT91C_PIOC_SODR |= (value << 2);
 }
 
@@ -94,7 +94,7 @@ void KeypadInit() {
     *AT91C_PIOC_OER = (1 << 7) | (1 << 8) | (1 << 9);
     *AT91C_PIOC_PPUDR = (1 << 7) | (1 << 8) | (1 << 9);
 
-    // Configure ROW pins as input (pin 34 is faulty and can't read input, all the pins have been shifted by one)
+    // Configure ROW pins as input
     *AT91C_PIOC_PER = (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6);
     *AT91C_PIOC_ODR = (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6);
 }
@@ -153,13 +153,13 @@ void Write_Command_2_Display(unsigned char Command) {
 	// Set C/D signal High (1 = Command)
 	*AT91C_PIOC_SODR = 1<<14;
 	// Clear chip select display
-	*AT91C_PIOC_CODR = 1<<13;
+	*AT91C_PIOC_CODR = 1<<16;
 	// Clear write display
 	*AT91C_PIOC_CODR = 1<<17;
 	// Make a Delay
 	Delay(100);
 	// Set chip enable display
-	*AT91C_PIOC_SODR = 1<<13;
+	*AT91C_PIOC_SODR = 1<<16;
 	// Set write display
 	*AT91C_PIOC_SODR = 1<<17;
 	// Disable output (74chip)
