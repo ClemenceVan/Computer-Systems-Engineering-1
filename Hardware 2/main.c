@@ -186,13 +186,13 @@ void Write_Data_2_Display(unsigned char Data) {
 	// Clear C/D signal High (0 = Data)
 	*AT91C_PIOC_CODR = 1<<14;
 	// Clear chip select display
-	*AT91C_PIOC_CODR = 1<<13;
+	*AT91C_PIOC_CODR = 1<<16;
 	// Clear write display
 	*AT91C_PIOC_CODR = 1<<17;
 	// Make a Delay
 	Delay(100);
 	// Set chip enable display
-	*AT91C_PIOC_SODR = 1<<13;
+	*AT91C_PIOC_SODR = 1<<16;
 	// Set write display
 	*AT91C_PIOC_SODR = 1<<17;
 	// Disable output (74chip)
