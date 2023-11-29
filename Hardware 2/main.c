@@ -2,43 +2,66 @@
 #include "at91sam3x8.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 
 // Databus functions
 
 typedef struct databus_s {
-	int dir;
+	int dir[2];
 	int databus_pins[8];
 } databus;
 
 databus display = {
-	13,
-	{1, 3, 4, 5, 6, 7, 8, 9}
+	{13, 12},
+	{2, 3, 4, 5, 6, 7, 8, 9}
 };
 
 void SetDir(databus db, int dir) {
-	*AT91C_PIOC_SODR = (dir ? 1 : 0 << db.dir);
+	if (dir) {
+		*AT91C_PIOC_SODR = (1 << db.dir[0]);
+		// *AT91C_PIOC_SODR = (1 << db.dir[1]);
+	} else {
+		*AT91C_PIOC_CODR = (1 << db.dir[0]);
+		// *AT91C_PIOC_CODR = (1 << db.dir[1]);
+	}
 }
 
 void SetBusAsOutput(databus db, int value) {
-	unsigned int* address = value ? AT91C_PIOD_OER : AT91C_PIOD_ODR;
-	for (int i = 0; i < 8; i++)
-		*address = (1 << db.databus_pins[i]);
+	for (int i = 0; i < 8; i++) {
+		if (value)
+			*AT91C_PIOC_OER = (1 << db.databus_pins[i]);
+		else
+			*AT91C_PIOC_ODR = (1 << db.databus_pins[i]);
+	}
 }
 
 unsigned char ReadDatabus(databus db) {
-	unsigned char temp = 0;
-	for (int i = 0; i < 8; i++)
-		temp |= (*AT91C_PIOC_PDSR & (1 << db.databus_pins[i])) << i;
+	unsigned char temp = 0b00000000;
+	// temp |=  ((*AT91C_PIOC_PDSR & (1 << 2)) >> 2) << 0;
+	// temp |=  ((*AT91C_PIOC_PDSR & (1 << 3)) >> 3) << 1;
+	// temp |=  ((*AT91C_PIOC_PDSR & (1 << 4)) >> 4) << 2;
+	// temp |=  ((*AT91C_PIOC_PDSR & (1 << 5)) >> 5) << 3;
+	// temp |=  ((*AT91C_PIOC_PDSR & (1 << 6)) >> 6) << 4;
+	// temp |=  ((*AT91C_PIOC_PDSR & (1 << 7)) >> 7) << 5;
+	// temp |=  ((*AT91C_PIOC_PDSR & (1 << 8)) >> 8) << 6;
+	// temp |=  ((*AT91C_PIOC_PDSR & (1 << 9)) >> 9) << 7;
+	temp = (*AT91C_PIOC_PDSR >> 2) & 0xFF;
+
 	return temp;
 }
 
 void SetDatabus(databus db, unsigned char value) {
-	for (int i = 0; i < 8; i++) {
-		if ((value >> (7 - i)) & 1)
-			*AT91C_PIOC_SODR = (1 << db.databus_pins[i]);
-		else
-			*AT91C_PIOC_CODR = (1 << db.databus_pins[i]);
-    }
+	// for (int i = 0; i < 8; i++) {
+	// 	if ((value >> (7 - i)) & 1) {
+	// 		*AT91C_PIOC_SODR = (1 << db.databus_pins[i]);
+	// 	} else {
+	// 		*AT91C_PIOC_CODR = (1 << db.databus_pins[i]);
+	// 		// *AT91C_PIOC_ODR = (1 << db.databus_pins[i]);
+    // 	}
+	// }
+	// *AT91C_PIOC_SODR = value << 2;
+	*AT91C_PIOC_CODR |= ((~value) << 2);
+	*AT91C_PIOC_SODR |= (value << 2);
 }
 
 int pollPanel() {
@@ -85,22 +108,23 @@ unsigned char Read_Status_Display(void) {
 	unsigned char temp;
 	// make databus as input
 	SetBusAsOutput(display, 0);
-	// Set dir as input (74chip, 1 = input)
+	// Set dir as input (74chip, 1 = input) // Clear/enable output (74chip 0 = enable) // check about pin 48
 	SetDir(display, 1);
-	// Clear/enable output (74chip 0 = enable) // check about pin 48
-	*AT91C_PIOC_CODR = 1<<15;
 	// Set C/D
 	*AT91C_PIOC_SODR = 1<<14;
+	*AT91C_PIOC_SODR = 1<<17;
 	// Clear chip select display
-	*AT91C_PIOC_CODR = 1<<17;
+	*AT91C_PIOC_CODR = 1<<15; // was at 3
 	// Clear read display
 	*AT91C_PIOC_CODR = 1<<16;
+
+	// *AT91C_PIOC_SODR = 1<<1;
 	// Make a Delay
-	Delay(10);
+	Delay(100);
 	// Read data bus and save it in temp
 	temp = ReadDatabus(display);
 	// Set chip select display
-	*AT91C_PIOC_SODR = 1<<17;
+	*AT91C_PIOC_SODR =  1<<15; // was at 3
 	// Set read display
 	*AT91C_PIOC_SODR = 1<<16;
 	// Disable output (74chip)
@@ -108,6 +132,7 @@ unsigned char Read_Status_Display(void) {
 	// Set dir as output (74chip)
 	SetDir(display, 0);
 	// Return (Temp)
+	printf("temp: %x\n", temp);
 	return temp;
 }
 
@@ -118,27 +143,29 @@ void Write_Command_2_Display(unsigned char Command) {
 	SetDatabus(display, 0);
 	// Set Command to databus
 	SetDatabus(display, Command);
+	printf("Command: %x\n", Command);
 	// Set dir as output (74chip)
-	SetBusAsOutput(display, 1);
+	SetDir(display, 0);
 	// Enable output (74chip)
-	*AT91C_PIOC_CODR = 1<<15;
+	// *AT91C_PIOC_CODR = 1<<12;
 	// Set databus as output
 	SetBusAsOutput(display, 1);
 	// Set C/D signal High (1 = Command)
 	*AT91C_PIOC_SODR = 1<<14;
 	// Clear chip select display
-	*AT91C_PIOC_CODR = 1<<15;
+	*AT91C_PIOC_CODR = 1<<13;
 	// Clear write display
 	*AT91C_PIOC_CODR = 1<<17;
 	// Make a Delay
-	Delay(10);
+	Delay(100);
 	// Set chip enable display
-	*AT91C_PIOC_SODR = 1<<17;
+	*AT91C_PIOC_SODR = 1<<13;
 	// Set write display
-	*AT91C_PIOC_SODR = 1<<16;
+	*AT91C_PIOC_SODR = 1<<17;
 	// Disable output (74chip)
-	*AT91C_PIOC_SODR = 1<<15;
+	// *AT91C_PIOC_SODR = 1<<12;
 	// Make databus as input 
+	SetDir(display, 1);
 	SetBusAsOutput(display, 0);
 }
 
@@ -150,25 +177,27 @@ void Write_Data_2_Display(unsigned char Data) {
 	// Set Data to databus
 	SetDatabus(display, Data);
 	// Set dir as output (74chip)
-	SetBusAsOutput(display, 1);
+	SetDir(display, 0);
 	// Enable output (74chip)
-	*AT91C_PIOC_CODR = 1<<15;
-	// Set databus as output
+	// *AT91C_PIOC_CODR = 1<<12;
+	// *AT91C_PIOC_CODR = 1<<13;
+	// // Set databus as output
 	SetBusAsOutput(display, 1);
 	// Clear C/D signal High (0 = Data)
 	*AT91C_PIOC_CODR = 1<<14;
 	// Clear chip select display
-	*AT91C_PIOC_CODR = 1<<15;
+	*AT91C_PIOC_CODR = 1<<13;
 	// Clear write display
 	*AT91C_PIOC_CODR = 1<<17;
 	// Make a Delay
-	Delay(10);
+	Delay(100);
 	// Set chip enable display
-	*AT91C_PIOC_SODR = 1<<17;
+	*AT91C_PIOC_SODR = 1<<13;
 	// Set write display
-	*AT91C_PIOC_SODR = 1<<16;
+	*AT91C_PIOC_SODR = 1<<17;
 	// Disable output (74chip)
-	*AT91C_PIOC_SODR = 1<<15;
+	// *AT91C_PIOC_SODR = 1<<12;
+	SetDir(display, 1);
 	// Make databus as input 
 	SetBusAsOutput(display, 0);
 }
@@ -177,7 +206,7 @@ void Init_Display(void) {
 	// Clear Reset display
 	*AT91C_PIOD_CODR = 1<<0;
 	// Make a Delay
-	Delay(10);
+	Delay(100);
 	// Set Reset display
 	*AT91C_PIOD_SODR = 1<<0;
 	Write_Data_2_Display(0x00);
@@ -196,29 +225,46 @@ void Init_Display(void) {
 	Write_Command_2_Display(0x94); // Text on graphic off
 }
 
-void DisplayPrintf(char* string, va_list args) {
+void DisplayPrintf(char* string, ...) {
 	char buffer[256];
+	va_list args;
+	va_start(args, string);
 	vsprintf(buffer, string, args);
-	for (int i = 0; buffer[i] != '\0'; i++)
-		Write_Data_2_Display(buffer[i] - 0x20); // idk how that works its 03:27 and it made sense
+	va_end(args);
+	for (int i = 0; buffer[i] != '\0'; i++) {
+		Write_Data_2_Display(buffer[i] - 0x20);
+		Write_Command_2_Display(0xC0);
+	}
 }
 
 void main(void) {
     SystemInit();
+	// KeypadInit();
 
     *AT91C_PMC_PCER = (1 << 13);
     *AT91C_PMC_PCER = (1 << 12);
 
 
-	// Configure OEBA pin as output and set it to high
-	*AT91C_PIOD_PER = (1 << 2);
-	*AT91C_PIOD_OER = (1 << 2);
+	// Configure OEBA pin as output and set it to high FOR KEYPAD
+	// *AT91C_PIOD_PER = (1 << 2);
+	// *AT91C_PIOD_OER = (1 << 2);
+
+
+	*AT91C_PIOC_PER = 1<<2 | 1 << 3 | 1 << 4 | 1 << 5 | 1 << 6 | 1 << 7 | 1<<8 | 1<<9 | 1<<12 | 1<<13 | 1<<14 | 1<<15 | 1<<16 | 1<<17;
+	*AT91C_PIOD_PER = 1<<0;
+	
+	*AT91C_PIOC_ODR = 1<<2 | 1 << 3 | 1 << 4 | 1 << 5 | 1 << 6 | 1 << 7 | 1<<8 | 1<<9;
+	*AT91C_PIOC_OER = 1<<12 | 1<<13 | 1<<14 | 1<<15 | 1<<16 | 1<<17;
+	*AT91C_PIOD_OER = 1<<0;
+
+	*AT91C_PIOD_SODR = 1<<12;
 
 	Init_Display();
 
-    while(1) {
-		DisplayPrintf("%d", pollPanel());
-    }
+     while(1) {
+	// 	// DisplayPrintf("%d", pollPanel());
+	 	DisplayPrintf("A");
+     }
 }
 
 /**
