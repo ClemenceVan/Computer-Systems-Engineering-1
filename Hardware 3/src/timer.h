@@ -1,0 +1,1 @@
+void InitTimer(int interval, void (*callback)(void));
