@@ -58,10 +58,9 @@ float GetTemp(void) {
   int rb = *AT91C_TC0_RB;
   int ra = *AT91C_TC0_RA;
   double ret = (rb - ra);
-  // T in us (tried a 1ms pulse and read the counter)
   ret = ret / 1.895; 
   ret = ret / (5.0);
   *AT91C_TC0_RB = 0x0;
   *AT91C_TC0_RA = 0x0;
-  return ret/(22.4)-273.15; // calculated val 22.4 by measuring
+  return ret/(22.4)-273.15;
 }
