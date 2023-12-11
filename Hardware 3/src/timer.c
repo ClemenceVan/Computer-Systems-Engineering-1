@@ -1,4 +1,4 @@
-#include "include.h"
+#include "timer.h"
 
 #define PIO_AIMER (AT91_CAST(AT91_REG *) 0x400E14B0)
 #define PIO_IFER (AT91_CAST(AT91_REG *) 0x400E1420)
@@ -8,20 +8,27 @@
 struct parametrs {
     int interval;
     void (*callback)(void);
-} timer = {0, 0};
-unsigned int ms = 0;
+} timerParams = {0, 0};
 
 void SysTick_Handler() {
-    ms++;
-
-    if(ms % timer.interval == 0) timer.callback();
+    Timer.ms++;
+    if(Timer.ms % timerParams.interval == 0) timerParams.callback();
 }
 
 void InitTimer(int interval, void (*callback)(void)) {
-    timer.callback = callback;
-    timer.interval = interval;
+    timerParams.callback = callback;
+    timerParams.interval = interval;
     *PIO_AIMER = (1 << 1);
     *PIO_IFER = (1 << 1);
     *PIO_DIFSR = (1 << 1);
     SysTick_Config((SystemCoreClock / 10));
 }
+
+timer Timer = {
+    .init = InitTimer,
+    .ms = 0,
+    .Flags = {
+        .temp = 0,
+        .light = 0,
+    }
+};

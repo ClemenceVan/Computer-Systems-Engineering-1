@@ -1,36 +1,30 @@
-#include "display.h"
-
-databus display = {
-	13, 
-	12,
-	{2, 3, 4, 5, 6, 7, 8, 9}
-};
+#include "Display.h"
 
 unsigned char Read_Status_Display(void) {
-	unsigned char temp;
-	SetBusAsOutput(display, 0);
-	SetDir(display, 1);
+	unsigned char tmp;
+	SetBusAsOutput(Display.db, 0);
+	SetDir(Display.db, 1);
 	*AT91C_PIOC_SODR = CD;
 	*AT91C_PIOC_SODR = WR;
 	*AT91C_PIOC_CODR = CE;
 	*AT91C_PIOC_CODR = RD;
 
 	Delay(10);
-	temp = ReadDatabus(display);
+	tmp = ReadDatabus(Display.db);
 	
 	*AT91C_PIOC_SODR = CE;
 	*AT91C_PIOC_SODR = RD;
-	SetBusAsOutput(display, 1);
-	SetDir(display, 0);
-	return temp;
+	SetBusAsOutput(Display.db, 1);
+	SetDir(Display.db, 0);
+	return tmp;
 }
 
 void Write_Command_2_Display(unsigned char Command) {
 	while ((Read_Status_Display() & 3) != 3) asm("nop");
-	SetDatabus(display, 0);
-	SetDatabus(display, Command);
-	SetDir(display, 0);
-	SetBusAsOutput(display, 1);
+	SetDatabus(Display.db, 0);
+	SetDatabus(Display.db, Command);
+	SetDir(Display.db, 0);
+	SetBusAsOutput(Display.db, 1);
 	*AT91C_PIOC_SODR = CD;
 	*AT91C_PIOC_CODR = CE;
 	*AT91C_PIOC_CODR = WR;
@@ -39,16 +33,16 @@ void Write_Command_2_Display(unsigned char Command) {
 	
 	*AT91C_PIOC_SODR = CE;
 	*AT91C_PIOC_SODR = WR;
-	SetDatabus(display, 0);
-	SetBusAsOutput(display, 0);
+	SetDatabus(Display.db, 0);
+	SetBusAsOutput(Display.db, 0);
 }
 
 void Write_Data_2_Display(unsigned char Data) {
 	while ((Read_Status_Display() & 3) != 3) asm("nop");
-	SetDatabus(display, 0);
-	SetDatabus(display, Data);
-	SetDir(display, 0);
-	SetBusAsOutput(display, 1);
+	SetDatabus(Display.db, 0);
+	SetDatabus(Display.db, Data);
+	SetDir(Display.db, 0);
+	SetBusAsOutput(Display.db, 1);
 	*AT91C_PIOC_CODR = CD;
 	*AT91C_PIOC_CODR = CE;
 	*AT91C_PIOC_CODR = WR;
@@ -57,12 +51,12 @@ void Write_Data_2_Display(unsigned char Data) {
 	
 	*AT91C_PIOC_SODR = CE;
 	*AT91C_PIOC_SODR = WR;
-	SetDatabus(display, 0);
-	SetBusAsOutput(display, 0);
+	SetDatabus(Display.db, 0);
+	SetBusAsOutput(Display.db, 0);
 }
 
-void Init_Display(void) {
-	// Reset display sequence
+void display_enable(void) {
+	// Reset Display.db sequence
 	*AT91C_PIOD_CODR = 1 << 0;
 	Delay(10);
 	*AT91C_PIOD_SODR = 1 << 0;
@@ -84,10 +78,21 @@ void Init_Display(void) {
 	Write_Data_2_Display(0x01);
 	Write_Data_2_Display(0x00);
 	Write_Command_2_Display(0xD0); // Text blink off
-	clearDisplay();
+	Display.clear();
 }
 
-void displayPrintf(char* string, ...) {
+int displayCursor(int x, int y) {
+	if (x < 0 || x > DISPLAY_WIDTH || y < 0 || y > DISPLAY_HEIGHT)
+		return -1;
+	Write_Data_2_Display((unsigned char)x);
+	Write_Data_2_Display((unsigned char)y);
+	Write_Command_2_Display(0x24);
+	return 0;
+}
+
+void displayPrintfAt(int pos[2], char* string, ...) {
+	if (displayCursor(pos[0], pos[1]) == -1)
+		return;
 	char buffer[256];
 	va_list args;
 	va_start(args, string);
@@ -110,12 +115,24 @@ void clearDisplay(void) {
 }
 
 void DisplayInit(void) {
-	*AT91C_PIOC_PER = 1 << 2 | 1 << 3 | 1 << 4 | 1 << 5 | 1 << 6 | 1 << 7 | 1 << 8 | 1 << 9 | 1 << 12 | 1 << 13 | 1 << 14 | 1 << 15 | 1 << 16 | 1 << 17;
+	*AT91C_PIOC_PER = DATABUS_MASK | 1 << Display.db.dir | 1 << Display.db.OE | DISPLAYCONTROL_MASK;
 	*AT91C_PIOD_PER = 1 << 0;
 	
-	*AT91C_PIOC_ODR = 1 << 2 | 1 << 3 | 1 << 4 | 1 << 5 | 1 << 6 | 1 << 7 | 1 << 8 | 1 << 9;
-	*AT91C_PIOC_OER = 1 << 12 | 1 << 13 | 1 << 14 | 1 << 15 | 1 << 16 | 1 << 17;
+	*AT91C_PIOC_ODR = DATABUS_MASK;
+	*AT91C_PIOC_OER = 1 << Display.db.dir | 1 << Display.db.OE | DISPLAYCONTROL_MASK;
 	*AT91C_PIOD_OER = 1 << 0;
 
-	*AT91C_PIOD_SODR = 1 << 12;
+	*AT91C_PIOD_SODR = 1 << Display.db.OE;
 }
+
+display Display = {
+	.printfAt = displayPrintfAt,
+	.clear = clearDisplay,
+	.init = DisplayInit,
+	.enable = display_enable,
+	.db = {
+		.dir = 13,
+		.OE = 12,
+		.data_pins = {2, 3, 4, 5, 6, 7, 8, 9}
+	}
+};

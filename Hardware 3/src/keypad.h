@@ -2,5 +2,9 @@
 #include "include.h"
 #include "databus.h"
 
-void KeypadInit(void);
-int pollPanel(void);
+typedef struct {
+    int(*poll)(void);
+    void(*init)(void);
+} keypad;
+
+extern keypad Keypad;

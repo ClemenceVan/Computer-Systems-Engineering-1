@@ -1,7 +1,4 @@
-#include "include.h"
-
-void TempStartReset(void) {
-}
+#include "temp.h"
 
 void TempSensorInit(void) {
     *AT91C_PMC_PCER = (1<<27); //TC0
@@ -20,47 +17,47 @@ void TempSensorInit(void) {
 	NVIC_ClearPendingIRQ(TC0_IRQn);
 	NVIC_SetPriority(TC0_IRQn,0);
 	NVIC_EnableIRQ(TC0_IRQn);
-    TempStartReset();
     
-   //Clear Line to Reset
-   *AT91C_PIOB_CODR = (1<<25);
-   Delay(10); //t_reset
+    //Clear Line to Reset
+    *AT91C_PIOB_CODR = (1<<25);
+    Delay(10); //t_reset
     
-   //setup pulse high
-   *AT91C_PIOB_SODR = (1<<25);
-   Delay(500);
+    //setup pulse high
+    *AT91C_PIOB_SODR = (1<<25);
+    Delay(500);
 }
 
 void TempStart(void) {
-    //0: no effect, 1: counter reset and clock start
-    *AT91C_TC0_CCR = (*AT91C_TC0_CCR|(1<<2));
-    
-    
-    //enable PIN25 as ouput
+    *AT91C_TC0_CCR |= (1<<2); // Counter reset & clock start
     *AT91C_PIOB_OER = (1<<25);
-    
     //start pulse
     *AT91C_PIOB_CODR = (1<<25);
-    Delay(1);  
+    Delay(5);
     
-    //ODR next to enable input (PIN25)
     *AT91C_PIOB_ODR = (1<<25);
-
-    //enable Interrupts
     *AT91C_TC0_IER = AT91C_TC_LDRBS; 
 }
 
+void TempStop(void) {
+	*AT91C_TC0_IDR=1<<6;
+	*AT91C_TC0_SR;
+}
+
 float GetTemp(void) {
-  //disable interrupts
-  *AT91C_TC0_IDR = AT91C_TC_LDRBS;
-  
   //calc temperature and return
   int rb = *AT91C_TC0_RB;
   int ra = *AT91C_TC0_RA;
+  *AT91C_TC0_RB = 0x0;
+  *AT91C_TC0_RA = 0x0;
   double ret = (rb - ra);
   ret = ret / 1.895; 
   ret = ret / (5.0);
-  *AT91C_TC0_RB = 0x0;
-  *AT91C_TC0_RA = 0x0;
   return ret/(22.4)-273.15;
 }
+
+tempSensor Temperature = {
+    .init = TempSensorInit,
+    .enable = TempStart,
+    .disable = TempStop,
+    .get = GetTemp
+};

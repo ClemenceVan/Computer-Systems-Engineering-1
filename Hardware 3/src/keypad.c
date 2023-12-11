@@ -27,3 +27,8 @@ void KeypadInit() {
     *AT91C_PIOC_PER = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
     *AT91C_PIOC_ODR = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
 }
+
+keypad Keypad = {
+	.poll = pollPanel,
+	.init = KeypadInit
+};
