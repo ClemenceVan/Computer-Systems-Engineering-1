@@ -24,6 +24,8 @@ void ADC_Handler(void) {
 
 
 void handle() {
+	Display.printfAt((int[2]){8, 15}, "  ", Keypad.poll());
+	Display.printfAt((int[2]){0, 15}, "Keypad: %d", Keypad.poll());
 	if(Timer.Flags.temp) {
 		Timer.Flags.temp = 0;
 		float temp = Temperature.get();
@@ -54,6 +56,7 @@ void init(void) {
 	Temperature.enable();
 	Light.enable();
 	Display.enable();
+	Display.clear();
 }
 
 void PIOD_Handler(void) {

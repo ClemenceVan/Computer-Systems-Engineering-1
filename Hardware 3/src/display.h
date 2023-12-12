@@ -10,12 +10,36 @@
 #define DISPLAYCONTROL_MASK CD | CE | RD | WR
 
 #define DISPLAY_WIDTH 40
-#define DISPLAY_HEIGHT 16
+#define DISPLAY_HEIGHT 15
 
 typedef struct {
+    /* 
+    * displayPrintfAt
+    * 
+    * Prints a string to the display at the specified position.
+    * 
+    * @param pos: The position to print the string at.
+    * @param string: The string to print.
+    * @param ...: The arguments to the string.
+    */
     void(*printfAt)(int pos[2], char* string, ...);
+    /*
+    * clear
+    *
+    * Clears the display.
+    */
     void(*clear)(void);
+    /*
+    * init
+    *
+    * Initializes the display.
+    */
     void(*init)(void);
+    /*
+    * enable
+    *
+    * Enables the display.
+    */
     void(*enable)(void);
     databus db;
 } display;

@@ -81,11 +81,12 @@ void display_enable(void) {
 	Display.clear();
 }
 
-int displayCursor(int x, int y) {
+int displayCursor(int x, int y) { 
 	if (x < 0 || x > DISPLAY_WIDTH || y < 0 || y > DISPLAY_HEIGHT)
 		return -1;
-	Write_Data_2_Display((unsigned char)x);
-	Write_Data_2_Display((unsigned char)y);
+	int pos = y * DISPLAY_WIDTH + x;
+	Write_Data_2_Display((unsigned char)pos);
+	Write_Data_2_Display((unsigned char)(pos >> 8));
 	Write_Command_2_Display(0x24);
 	return 0;
 }

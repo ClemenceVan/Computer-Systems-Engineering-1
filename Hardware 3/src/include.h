@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include "../lib/system_sam3x.h"
 #include "../lib/at91sam3x8.h"
 

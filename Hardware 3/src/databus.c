@@ -1,4 +1,3 @@
-#pragma once
 #include "databus.h"
 
 void SetDir(databus db, int dir) {

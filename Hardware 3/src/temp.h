@@ -8,7 +8,3 @@ typedef struct temp_s {
 } tempSensor;
 
 extern tempSensor Temperature;
-
-void TempSensorInit(void);
-void TempStart(void);
-float GetTemp(void);
