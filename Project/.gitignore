@@ -1,0 +1,5 @@
+proj.*
+*.out
+Debug
+.vscode
+settings
