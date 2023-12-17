@@ -24,19 +24,51 @@ void ADC_Handler(void) {
 
 
 void handle() {
-	Display.printfAt((int[2]){8, 15}, "  ", Keypad.poll());
-	Display.printfAt((int[2]){0, 15}, "Keypad: %d", Keypad.poll());
-	if(Timer.Flags.temp) {
-		Timer.Flags.temp = 0;
-		float temp = Temperature.get();
-		Temperature.enable();
-		Display.printfAt((int[2]){0, 0}, "temp: %f", temp);
+		Display.printfAt((int[2]){(DISPLAY_WIDTH/2)-6, DISPLAY_HEIGHT/2}, " SMART HOME ");
+        Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[1]Calendar ");
+        Display.printfAt((int[2]){13, DISPLAY_HEIGHT}, "[2]Recordings ");
+        Display.printfAt((int[2]){29, DISPLAY_HEIGHT}, "[3]Settings ");
+	
+	switch(Keypad.poll()){
+		
+		case 0:
+		break;
+
+		case 1:
+		Display.clear();
+		Display.printfAt((int[2]){0, 0}, "CALENDAR");
+		Display.printfAt((int[2]){0, 1}, "dd/mm/yyyy");
+		break;
+
+		case 2:
+		Display.clear();
+		Display.printfAt((int[2]){0, 0}, "RECORDINGS");
+		Display.printfAt((int[2]){0, 1}, "Latest Recorded temp:");
+		break;
+
+		case 3:
+		Display.clear();
+		Display.printfAt((int[2]){0, 0}, "SETTINGS");
+		Display.printfAt((int[2]){0, 1}, "Temperature limits:");
+		break;
+
+		default: 
+		Display.clear();
+		
 	}
-	if (Timer.Flags.light) {
-		Timer.Flags.light = 0;
-		Display.printfAt((int[2]){DISPLAY_WIDTH - 15, 0}, "light: %f", Light.get());
-		Light.enable();
-	}
+	//Display.printfAt((int[2]){8, 15}, "  ", Keypad.poll());
+	//Display.printfAt((int[2]){0, 2}, "Keypad: %d", Keypad.poll());
+	//if(Timer.Flags.temp) {
+	//	Timer.Flags.temp = 0;
+	//	float temp = Temperature.get();
+	//	Temperature.enable();
+	//	Display.printfAt((int[2]){0, 0}, "temp: %f", temp);
+	//}
+	//if (Timer.Flags.light) {
+	//	Timer.Flags.light = 0;
+	//	Display.printfAt((int[2]){DISPLAY_WIDTH - 15, 0}, "light: %f", Light.get());
+	//	Light.enable();
+	//}
 }
 
 void init(void) {
