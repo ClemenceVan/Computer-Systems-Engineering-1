@@ -6,6 +6,7 @@
 #include "temp.h"
 #include "lightsensor.h"
 #include "servo.h"
+#include "calendar.h"
 
 void Delay(int value) {
 	for (int i = 0; i < value; i++)
@@ -24,6 +25,15 @@ void ADC_Handler(void) {
 
 
 void handle() {
+	// Update time
+	static int toSec = 0;
+	toSec += 10;
+	if (toSec >= 1000) {
+		toSec = 0;
+		Calendar.now += 1;
+	}
+
+
 		Display.printfAt((int[2]){(DISPLAY_WIDTH/2)-6, DISPLAY_HEIGHT/2}, " SMART HOME ");
         Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[1]Calendar ");
         Display.printfAt((int[2]){13, DISPLAY_HEIGHT}, "[2]Recordings ");
@@ -56,19 +66,7 @@ void handle() {
 		Display.clear();
 		
 	}
-	//Display.printfAt((int[2]){8, 15}, "  ", Keypad.poll());
-	//Display.printfAt((int[2]){0, 2}, "Keypad: %d", Keypad.poll());
-	//if(Timer.Flags.temp) {
-	//	Timer.Flags.temp = 0;
-	//	float temp = Temperature.get();
-	//	Temperature.enable();
-	//	Display.printfAt((int[2]){0, 0}, "temp: %f", temp);
-	//}
-	//if (Timer.Flags.light) {
-	//	Timer.Flags.light = 0;
-	//	Display.printfAt((int[2]){DISPLAY_WIDTH - 15, 0}, "light: %f", Light.get());
-	//	Light.enable();
-	//}
+	Display.printfAt((int[2]){DISPLAY_WIDTH - 19, 0}, Calendar.toString(Calendar.getNow()));
 }
 
 void init(void) {
