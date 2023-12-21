@@ -24,38 +24,43 @@ void ADC_Handler(void) {
 
 
 void handle() {
+		
+	switch(Keypad.poll()){
+
+		case 11:
+		Display.clear();
 		Display.printfAt((int[2]){(DISPLAY_WIDTH/2)-6, DISPLAY_HEIGHT/2}, " SMART HOME ");
         Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[1]Calendar ");
         Display.printfAt((int[2]){13, DISPLAY_HEIGHT}, "[2]Recordings ");
         Display.printfAt((int[2]){29, DISPLAY_HEIGHT}, "[3]Settings ");
-	
-	switch(Keypad.poll()){
-		
-		case 0:
 		break;
 
 		case 1:
 		Display.clear();
 		Display.printfAt((int[2]){0, 0}, "CALENDAR");
 		Display.printfAt((int[2]){0, 1}, "dd/mm/yyyy");
+		Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[0]Back");
 		break;
 
 		case 2:
 		Display.clear();
 		Display.printfAt((int[2]){0, 0}, "RECORDINGS");
 		Display.printfAt((int[2]){0, 1}, "Latest Recorded temp:");
+		Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[0]Back");
 		break;
 
 		case 3:
 		Display.clear();
 		Display.printfAt((int[2]){0, 0}, "SETTINGS");
 		Display.printfAt((int[2]){0, 1}, "Temperature limits:");
+		Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[0]Back");
 		break;
-
-		default: 
-		Display.clear();
-		
 	}
+
+	}
+	
+
+	
 	//Display.printfAt((int[2]){8, 15}, "  ", Keypad.poll());
 	//Display.printfAt((int[2]){0, 2}, "Keypad: %d", Keypad.poll());
 	//if(Timer.Flags.temp) {
@@ -69,7 +74,7 @@ void handle() {
 	//	Display.printfAt((int[2]){DISPLAY_WIDTH - 15, 0}, "light: %f", Light.get());
 	//	Light.enable();
 	//}
-}
+
 
 void init(void) {
     SystemInit();
@@ -119,6 +124,11 @@ void main(void) {
     NVIC_EnableIRQ(PIOD_IRQn);
     
     *AT91C_PIOD_IER = 1 << 1 | 1 << 9;
+
+	Display.printfAt((int[2]){(DISPLAY_WIDTH/2)-6, DISPLAY_HEIGHT/2}, " SMART HOME ");
+        Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[1]Calendar ");
+        Display.printfAt((int[2]){13, DISPLAY_HEIGHT}, "[2]Recordings ");
+        Display.printfAt((int[2]){29, DISPLAY_HEIGHT}, "[3]Settings ");
 
 	while(1) {
     }
