@@ -1,17 +1,9 @@
 #include "calendar.h"
 
-typedef struct {
-    unsigned short hour;
-    unsigned short minute;
-    unsigned short second;
-} Time;
 
-typedef struct {
-    unsigned short day;
-    unsigned short month;
-    unsigned short year;
-    Time time;
-} Date;
+time_t getTimestamp() {
+    return Calendar.now;
+}
 
 Date getDate() {
     struct tm tm = *localtime(&Calendar.now);
@@ -41,13 +33,45 @@ void setDateTime(Date date) {
 
 char* dateToString(Date date) {
     static char buffer[20];
-    sprintf(buffer, "%d/%d/%d %d:%d:%d", date.day, date.month, date.year, date.time.hour, date.time.minute, date.time.second);
+    sprintf(buffer, "%d/%d/%d %d:%d:%d ", date.day, date.month, date.year, date.time.hour, date.time.minute, date.time.second);
     return buffer;
+}
+
+void clearReadings(Node *node) {
+    if (node == NULL) return;
+    clearReadings(node->next);
+    free(node);
+}
+
+void manageReadings() {
+    Node *node = Calendar.temperatures;
+    Node *temp = NULL;
+    for (; node != NULL; node = node->next) {
+        if (node->timestamp < Calendar.now - READING_EXPIRATION) {
+            temp = node;
+            break;
+        }
+    }
+    if (temp != NULL) {
+        node->next = NULL;
+        clearReadings(temp);
+    }
+}
+
+void addTemperature(float temperature) {
+    // manageReadings();
+    Node* node = (Node*) malloc(sizeof(Node));
+    node->timestamp = getTimestamp();
+    node->temperature = temperature;
+    node->next = Calendar.temperatures;
+    Calendar.temperatures = node;
 }
 
 calendar Calendar = {
     .now = 0,
+    .temperatures = NULL,
     .getNow = getDate,
     .setDateTime = setDateTime,
-    .toString = dateToString
+    .toString = dateToString,
+    .addTemperature = addTemperature
 };
