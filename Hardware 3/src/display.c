@@ -106,13 +106,15 @@ void displayPrintfAt(int pos[2], char* string, ...) {
 }
 
 void clearDisplay(void) {
-	for (int i = 0; i < 1024; i++) {
-		Write_Data_2_Display(0x00);
-		Write_Command_2_Display(0xC0);
-	}
-	Write_Data_2_Display(0x00);
-	Write_Data_2_Display(0x00);
-	Write_Command_2_Display(0x24);
+    displayCursor(0, 0);
+    for (int i = 0; i < 1024; i++) {
+        Write_Data_2_Display(0x00);
+        Write_Data_2_Display(0x00);
+        Write_Command_2_Display(0xC0);
+    }
+    Write_Data_2_Display(0x00);
+    Write_Data_2_Display(0x00);
+    Write_Command_2_Display(0x24);
 }
 
 void DisplayInit(void) {
