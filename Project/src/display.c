@@ -1,4 +1,5 @@
 #include "Display.h"
+#include "Timer.h"
 
 unsigned char Read_Status_Display(void) {
 	unsigned char tmp;
@@ -20,6 +21,7 @@ unsigned char Read_Status_Display(void) {
 }
 
 void Write_Command_2_Display(unsigned char Command) {
+	*AT91C_PIOC_IDR = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
 	while ((Read_Status_Display() & 3) != 3) asm("nop");
 	SetDatabus(Display.db, 0);
 	SetDatabus(Display.db, Command);
@@ -35,9 +37,26 @@ void Write_Command_2_Display(unsigned char Command) {
 	*AT91C_PIOC_SODR = WR;
 	SetDatabus(Display.db, 0);
 	SetBusAsOutput(Display.db, 0);
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	if (!Timer.Flags.keypad)
+		*AT91C_PIOC_IER = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
 }
 
 void Write_Data_2_Display(unsigned char Data) {
+	*AT91C_PIOC_IDR = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
 	while ((Read_Status_Display() & 3) != 3) asm("nop");
 	SetDatabus(Display.db, 0);
 	SetDatabus(Display.db, Data);
@@ -53,6 +72,22 @@ void Write_Data_2_Display(unsigned char Data) {
 	*AT91C_PIOC_SODR = WR;
 	SetDatabus(Display.db, 0);
 	SetBusAsOutput(Display.db, 0);
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	*AT91C_PIOC_ISR;
+	if (!Timer.Flags.keypad) // COULD BE THE ISSUE
+		*AT91C_PIOC_IER = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
 }
 
 void display_enable(void) {

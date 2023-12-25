@@ -12,6 +12,7 @@ int pollPanel() {
 				return value = (row == 4 ? 0 : row) * 3 + (col == 0 ? 3 : col);
 		*AT91C_PIOC_SODR = (1 << (col + 7)); // Set the column again
 	}
+	*AT91C_PIOC_CODR = (1 << 7) | (1 << 8) | (1 << 9);
 	return value;
 }
 

@@ -1,11 +1,6 @@
 #include "timer.h"
 #include "calendar.h"
 
-#define PIO_AIMER (AT91_CAST(AT91_REG *) 0x400E14B0)
-#define PIO_IFER (AT91_CAST(AT91_REG *) 0x400E1420)
-#define PIO_DIFSR (AT91_CAST(AT91_REG *) 0x400E1484)
-#define PIO_SCDR (AT91_CAST(AT91_REG *) 0x400E148C)
-
 struct parametrs {
     int interval;
     void (*callback)(void);
@@ -14,7 +9,7 @@ struct parametrs {
 void SysTick_Handler() {
     Timer.ms++;
     if (Timer.ms % 10 == 0) Calendar.now++;
-    if(Timer.ms % timerParams.interval == 0) timerParams.callback();
+    /*if(Timer.ms % /*timerParams.interval*//* 1 == 0)*/ timerParams.callback();
 }
 
 void InitTimer(int interval, void (*callback)(void)) {

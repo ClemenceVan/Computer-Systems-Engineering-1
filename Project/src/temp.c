@@ -25,6 +25,7 @@ void TempSensorInit(void) {
     //setup pulse high
     *AT91C_PIOB_SODR = (1<<25);
     Delay(500);
+    Temperature.initialized = 1;
 }
 
 void TempStart(void) {
@@ -55,9 +56,21 @@ float GetTemp(void) {
   return ret/(22.4)-273.15;
 }
 
+void enableTemp(void) {
+    Temperature.enabled = 1;
+}
+
+void disableTemp(void) {
+    Temperature.enabled = 0;
+}
+
 tempSensor Temperature = {
+    .initialized = 0,
+    .enabled = 0,
     .init = TempSensorInit,
-    .enable = TempStart,
-    .disable = TempStop,
+    .enable = enableTemp,
+    .disable = disableTemp,
+    .start = TempStart,
+    .stop = TempStop,
     .get = GetTemp
 };
