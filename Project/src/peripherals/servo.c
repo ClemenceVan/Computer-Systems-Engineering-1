@@ -1,4 +1,4 @@
-#include "servo.h"
+#include "./servo.h"
 
 // temporary position variable, to be mooved
 int position = 0;

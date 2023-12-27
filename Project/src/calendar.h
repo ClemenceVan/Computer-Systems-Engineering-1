@@ -1,3 +1,4 @@
+#pragma once
 #include "include.h"
 #include <time.h>
 #include <stdio.h>

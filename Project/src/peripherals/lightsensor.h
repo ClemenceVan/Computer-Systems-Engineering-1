@@ -1,4 +1,5 @@
-#include "include.h"
+#pragma once
+#include "../include.h"
 
 // void LightSensorInit(void);
 

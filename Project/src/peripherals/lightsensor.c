@@ -1,4 +1,4 @@
-#include "lightsensor.h"
+#include "./lightsensor.h"
 
 void LightSensorInit() {
 	*AT91C_PMC_PCER1 = (1<<5); //Enable PMC for ADC

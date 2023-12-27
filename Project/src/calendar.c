@@ -33,7 +33,7 @@ void setDateTime(Date date) {
 
 char* dateToString(Date date) {
     static char buffer[20];
-    sprintf(buffer, "%d/%d/%d %d:%d:%d ", date.day, date.month, date.year, date.time.hour, date.time.minute, date.time.second);
+    sprintf(buffer, "%02d/%02d/%02d %02d:%02d:%02d", date.day, date.month, date.year, date.time.hour, date.time.minute, date.time.second);
     return buffer;
 }
 

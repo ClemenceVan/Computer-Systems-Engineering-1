@@ -1,4 +1,5 @@
-#include "include.h"
+#pragma once
+#include "../include.h"
 
 typedef struct {
     void(*setPos)(int pos);

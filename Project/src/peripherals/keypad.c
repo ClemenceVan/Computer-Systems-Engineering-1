@@ -1,4 +1,4 @@
-#include "keypad.h"
+#include "./keypad.h"
 
 int pollPanel() {
 	int value = 0;
@@ -31,5 +31,6 @@ void KeypadInit() {
 
 keypad Keypad = {
 	.poll = pollPanel,
-	.init = KeypadInit
+	.init = KeypadInit,
+	.key = 0
 };

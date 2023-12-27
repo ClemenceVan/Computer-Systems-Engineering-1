@@ -1,5 +1,6 @@
-#include "include.h"
-#include "databus.h"
+#pragma once
+#include "../include.h"
+#include "./databus.h"
 
 #define CD (1 << 14)
 #define CE (1 << 15)

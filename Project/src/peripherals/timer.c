@@ -1,5 +1,5 @@
-#include "timer.h"
-#include "calendar.h"
+#include "./timer.h"
+#include "../calendar.h"
 
 struct parametrs {
     int interval;

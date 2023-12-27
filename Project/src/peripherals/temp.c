@@ -1,4 +1,4 @@
-#include "temp.h"
+#include "./temp.h"
 
 void TempSensorInit(void) {
     *AT91C_PMC_PCER = (1<<27); //TC0
