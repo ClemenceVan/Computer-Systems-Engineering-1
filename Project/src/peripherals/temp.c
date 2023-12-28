@@ -24,7 +24,7 @@ void TempSensorInit(void) {
     
     //setup pulse high
     *AT91C_PIOB_SODR = (1<<25);
-    Delay(500);
+    // Delay(500);
     Temperature.initialized = 1;
 }
 

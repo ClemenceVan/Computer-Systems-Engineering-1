@@ -9,7 +9,7 @@ struct parametrs {
 void SysTick_Handler() {
     Timer.ms++;
     if (Timer.ms % 10 == 0) Calendar.now++;
-    /*if(Timer.ms % /*timerParams.interval*//* 1 == 0)*/ timerParams.callback();
+    if(Timer.ms % timerParams.interval == 0) timerParams.callback();
 }
 
 void InitTimer(int interval, void (*callback)(void)) {
@@ -23,9 +23,5 @@ void InitTimer(int interval, void (*callback)(void)) {
 
 timer Timer = {
     .init = InitTimer,
-    .ms = 0,
-    .Flags = {
-        .temp = 0,
-        .light = 0,
-    }
+    .ms = 0
 };

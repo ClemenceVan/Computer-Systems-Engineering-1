@@ -7,15 +7,8 @@
 #define PIO_SCDR (AT91_CAST(AT91_REG *) 0x400E148C)
 
 typedef struct {
-    int temp;
-    int light;
-    int keypad;
-} flags;
-
-typedef struct {
     int ms;
     void (*init)(int interval, void (*callback)(void));
-    flags Flags;
 } timer;
 
 extern timer Timer;

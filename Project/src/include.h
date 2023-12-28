@@ -5,6 +5,24 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+typedef struct {
+    int temp;
+    int light;
+    int keypad;
+    char *alert;
+} Flags;
+
+typedef struct {
+    int tempLimits[2];
+} Params;
+
+typedef struct {
+    Flags flags;
+    Params params;
+} master;
+
+extern master Master;
+
 void Delay(int time);
 
 #define PIOC_ESR (AT91_CAST(AT91_REG *) 0x400E12C0) // PIOC Edge Select Register

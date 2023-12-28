@@ -1,5 +1,6 @@
 #include "./include.h"
 #include "scenes/scenes.h"
+
 #include "peripherals/databus.h"
 #include "peripherals/keypad.h"
 #include "peripherals/display.h"
@@ -9,10 +10,23 @@
 #include "peripherals/servo.h"
 #include "calendar.h"
 
+#include <string.h>
+
 #define IDLE 0
-#define READY 1
-#define AUTO_RECORDING 2
-#define AUTO_READY 3
+#define READING 1
+#define READY 2
+
+master Master = {
+	.flags = {
+		.temp = IDLE,
+		.light = 0,
+		.keypad = 0,
+		.alert = 0
+	},
+	.params = {
+		.tempLimits = { 10, 22}
+	}
+};
 
 void Delay(int value) {
 	for (int i = 0; i < value; i++)
@@ -20,13 +34,13 @@ void Delay(int value) {
 }
 
 void TC0_Handler(void) {
-	if (Timer.Flags.temp == AUTO_RECORDING) Timer.Flags.temp = AUTO_READY;
-	else Timer.Flags.temp = READY;
-	Temperature.disable();
+	Temperature.stop();
+	Master.flags.temp = READY;
+	printf("TC0\n");
 }
 
 void ADC_Handler(void) {
-	Timer.Flags.light = 1;
+	Master.flags.light = 1;
 	Light.disable();
 }
 
@@ -48,37 +62,50 @@ int switchScreen(int screen) {
 }
 
 void handle() {
-	// Watch for temperature recording
-	// if (Temperature.initialized && elapsed % 60000 == 0) {
-	// 	Timer.Flags.temp = AUTO_RECORDING;
-	// 	Temperature.start();
-	// 	elapsed = 0;
-	// }
-
-	// switch (Timer.Flags.temp) {
-	// 	case IDLE:
-	// 		break;
+	static unsigned long elapsed = 0;
+	static int recordTemp = 0;
+	if (Master.flags.alert) {
+		if (*AT91C_PIOB_ODSR & (1 << 27))
+			*AT91C_PIOB_CODR = 1 << 27;
+		else
+			*AT91C_PIOB_SODR = 1 << 27;
+	} else if (elapsed % 100 == 0) {
+		recordTemp = 1;
+	}
+	elapsed += 10;
+	switch (Master.flags.temp) {
+		case IDLE:
+			break;
 		
-	// 	case READY:
-	// 		// TBD
-	// 		if (Temperature.enabled) Temperature.start();
-	// 		break;
-	// 	case AUTO_READY:
-	// 		Calendar.addTemperture(Temperature.get()); // to be tested
-	// 		if (Temperature.enabled) Temperature.start();
-	// 		break;
-	// 	default:
-	// 		break;
-	// }
+		case READY:
+			float temp = Temperature.get();
+			if (!Master.flags.alert && (temp < Master.params.tempLimits[0] || temp > Master.params.tempLimits[1])) {
+				printf("%d, %d\n", Master.params.tempLimits[0], Master.params.tempLimits[1]);
+				printf("%d, %d\n", temp < Master.params.tempLimits[0], temp > Master.params.tempLimits[1]);
+				Master.flags.alert = malloc(sizeof(char) * 24);
+				strcpy(Master.flags.alert, temp > Master.params.tempLimits[0] ? "Temperature too high!" : "Temperature too low!");
+			}
+			if (recordTemp) {
+				Calendar.addTemperature(temp); // to be tested
+				recordTemp = 0;
+			}
+			Temperature.start();
+			Master.flags.temp = READING;
+			break;
+		case READING:
+			break;
+		default:
+			break;
+	}
 
-	// if (Timer.Flags.temp != IDLE) {
-	// 	if (Timer.Flags.temp == READY) {
+	// if (Master.flags.temp != IDLE) {
+	// 	if (Master.flags.temp == READY) {
 	// 		// TBD
 	// 	}
-	// 	else if (Timer.Flags.temp == AUTO_READY) {
+	// 	else if (Master.flags.temp == AUTO_READY) {
 	// 		Display.printfAt((int[2]){0, 1}, "Latest Recorded temp: %.2f", Temperature.get());
 	// 	}
-	// 	Timer.Flags.temp = IDLE;
+	// 	Master.flags.temp = IDLE;
 	// 	Temperature.disable();
 	// }
 	// Display.printfAt((int[2]){DISPLAY_WIDTH - 19, 0}, Calendar.toString(Calendar.getNow()));
@@ -89,19 +116,23 @@ void init(void) {
 	// Enable PIO
 	*AT91C_PMC_PCER = (1 << 13);
 	*AT91C_PMC_PCER = (1 << 12);
-	
+	*AT91C_PIOB_PER = 1 << 27;
+	*AT91C_PIOB_OER = 1 << 27;
+
 	// Enable peripherals pins
 	Keypad.init();
 	// Servo.init();
 	Display.init();
-	// Temperature.init();
+	Temperature.init();
 	// Light.init();
 
-	// Temperature.enable();
+	Temperature.enable();
+	Temperature.start();
 	Timer.init(10, handle);
 	// Light.enable();
 	Display.enable();
 	Display.clear();
+
 }
 
 void PIOD_Handler(void) {
@@ -121,18 +152,11 @@ void PIOC_Handler(void) {
 	*AT91C_PIOC_ISR;
 	*AT91C_PIOC_IER = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
 	// Keypad.key = t ? t : Keypad.key;
-	// Timer.Flags.keypad = 1;
+	// Master.flags.keypad = 1;
 }
-
-
 
 void main(void) {
 	init();
-
-	Display.printfAt((int[2]){(DISPLAY_WIDTH/2)-6, DISPLAY_HEIGHT/2}, " SMART HOME ");
-	Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[1]Calendar ");
-	Display.printfAt((int[2]){13, DISPLAY_HEIGHT}, "[2]Recordings ");
-	Display.printfAt((int[2]){29, DISPLAY_HEIGHT}, "[3]Settings ");
 
 	// For buttons, to be cleaned up
     *AT91C_PMC_PCER = (1 << 14);

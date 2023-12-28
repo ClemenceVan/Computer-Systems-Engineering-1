@@ -37,24 +37,31 @@ char* dateToString(Date date) {
     return buffer;
 }
 
-void clearReadings(Node *node) {
-    if (node == NULL) return;
-    clearReadings(node->next);
-    free(node);
+void clearReadings(Node *startNode) {
+    while (startNode != NULL) {
+        Node *temp = startNode;
+        startNode = startNode->next;
+        free(temp); // Free the memory associated with the node
+    }
 }
 
 void manageReadings() {
     Node *node = Calendar.temperatures;
-    Node *temp = NULL;
+    Node *prev = NULL;
+
+    // Traverse the list
     for (; node != NULL; node = node->next) {
-        if (node->timestamp < Calendar.now - READING_EXPIRATION) {
-            temp = node;
+        if (node->timestamp > 10) {
+            // Clear rest of the list
+            clearReadings(node);
+            if (prev != NULL) {
+                prev->next = NULL; // Update the next pointer of the previous node
+            } else {
+                Calendar.temperatures = NULL; // Update the head of the list
+            }
             break;
         }
-    }
-    if (temp != NULL) {
-        node->next = NULL;
-        clearReadings(temp);
+        prev = node;
     }
 }
 
@@ -65,6 +72,7 @@ void addTemperature(float temperature) {
     node->temperature = temperature;
     node->next = Calendar.temperatures;
     Calendar.temperatures = node;
+    printf("Added temperature: %f\n", temperature);
 }
 
 calendar Calendar = {

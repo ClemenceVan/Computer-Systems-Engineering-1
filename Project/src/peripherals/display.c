@@ -38,7 +38,7 @@ void Write_Command_2_Display(unsigned char Command) {
 	SetDatabus(Display.db, 0);
 	SetBusAsOutput(Display.db, 0);
 	*AT91C_PIOC_ISR;
-	// if (!Timer.Flags.keypad)
+	// if (!Master.flags.keypad)
 		*AT91C_PIOC_IER = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
 }
 
@@ -60,7 +60,7 @@ void Write_Data_2_Display(unsigned char Data) {
 	SetDatabus(Display.db, 0);
 	SetBusAsOutput(Display.db, 0);
 	*AT91C_PIOC_ISR;
-	// if (!Timer.Flags.keypad) // COULD BE THE ISSUE
+	// if (!Master.flags.keypad) // COULD BE THE ISSUE
 		*AT91C_PIOC_IER = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
 }
 
