@@ -24,7 +24,8 @@ master Master = {
 		.alert = 0
 	},
 	.params = {
-		.tempLimits = { 10, 22}
+		.tempLimits = {10, 25},
+		.fastMode = 0
 	}
 };
 
@@ -85,7 +86,7 @@ void handle() {
 				Master.flags.alert = malloc(sizeof(char) * 24);
 				strcpy(Master.flags.alert, temp > Master.params.tempLimits[0] ? "Temperature too high!" : "Temperature too low!");
 			}
-			if (recordTemp) {
+			if (recordTemp || Master.params.fastMode) {
 				Calendar.addTemperature(temp); // to be tested
 				recordTemp = 0;
 			}

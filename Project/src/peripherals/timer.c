@@ -8,8 +8,8 @@ struct parametrs {
 
 void SysTick_Handler() {
     Timer.ms++;
-    if (Timer.ms % 10 == 0) Calendar.now++;
-    if(Timer.ms % timerParams.interval == 0) timerParams.callback();
+    if (Timer.ms % 10 == 0) Calendar.now += Master.params.fastMode ? 1800 : 1;
+    if (Timer.ms % timerParams.interval == 0) timerParams.callback();
 }
 
 void InitTimer(int interval, void (*callback)(void)) {

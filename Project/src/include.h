@@ -14,6 +14,7 @@ typedef struct {
 
 typedef struct {
     int tempLimits[2];
+    int fastMode;
 } Params;
 
 typedef struct {
