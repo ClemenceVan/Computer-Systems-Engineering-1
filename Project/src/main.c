@@ -24,7 +24,7 @@ master Master = {
 		.alert = 0
 	},
 	.params = {
-		.tempLimits = {10, 25},
+		.tempLimits = {20, 25},
 		.fastMode = 0
 	}
 };
@@ -37,7 +37,6 @@ void Delay(int value) {
 void TC0_Handler(void) {
 	Temperature.stop();
 	Master.flags.temp = READY;
-	printf("TC0\n");
 }
 
 void ADC_Handler(void) {
@@ -195,7 +194,25 @@ void main(void) {
 	NVIC_EnableIRQ(PIOC_IRQn);
 	*AT91C_PIOC_ISR;
 
-	
+	/* Temp TEST mode */
+	// add 3 previous days of temperatures for every 30 minutes
+	Calendar.now = Calendar.now - 86400 * 3;
+	for (int i = 0; i < 72; i++) {
+		Calendar.addTemperature(20 + (rand() % 10) - 5);
+		Calendar.now += 1800;
+	}
+	Calendar.getRecordings(Calendar.getEndOfDay() - 86400 * 2, Calendar.getEndOfDay());
+	Calendar.setDateTime((Date) {
+			.day = 21,
+			.month = 12,
+			.year = 2023,
+			.time = (Time) {
+				.hour = 13,
+				.minute = 17,
+				.second = 0
+			}
+		});
+	/*                */
 	while(1) {
 		currentScreen = switchScreen(currentScreen);//currentScreen);
     }

@@ -21,7 +21,7 @@ typedef struct {
 } Date;
 
 struct node_t {
-    float timestamp;
+    time_t timestamp;
     float temperature;
     struct node_t* next;
 };
@@ -32,9 +32,13 @@ typedef struct {
     time_t now;
     Node* temperatures;
     Date (*getNow)(void);
+    time_t (*getEndOfDay)();
+    Date (*getDateFromTimestamp)(time_t timestamp);
     void (*setDateTime)(Date date);
     char* (*toString)(Date date);
     void (*addTemperature)(float temperature);
+    Node* (*getRecordings)(time_t from, time_t to);
+    void (*freeList)(Node* startNode);
 } calendar;
 
 extern calendar Calendar;

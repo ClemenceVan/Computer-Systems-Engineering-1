@@ -167,7 +167,7 @@ int settingsScene() {
 	while (1) {
 		Keypad.key = 0;
 		Display.clear();
-		Display.printfAt((int[2]){0, 0}, "SETTINGS");
+		Display.printfAt((int[2]){0, 0}, "    SETTINGS");
 		Display.printfAt((int[2]){0, 2}, "[1] Set Date/Time");
 		Display.printfAt((int[2]){0, 3}, "[2] Set Temperature Limits");
 		Display.printfAt((int[2]){0, 4}, "[3] %s Fast Mode", Master.params.fastMode ? "Disable" : "Enable");
