@@ -27,6 +27,16 @@ void KeypadInit() {
     // Configure ROW pins as input
     *AT91C_PIOC_PER = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
     *AT91C_PIOC_ODR = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
+	// keypad interrupts
+    *AT91C_PIOC_PPUDR = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
+    *AT91C_PIOC_IER = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
+	*PIOC_AIMER = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
+	*PIOC_ESR = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
+	*PIOC_FELLSR = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
+	NVIC_ClearPendingIRQ(PIOC_IRQn);
+	NVIC_SetPriority(PIOC_IRQn, 0);
+	NVIC_EnableIRQ(PIOC_IRQn);
+	*AT91C_PIOC_ISR;
 }
 
 keypad Keypad = {

@@ -1,5 +1,12 @@
 #include "scenes.h"
 
+// small easter egg :)
+// used to adjust the code of the keypad and its interrupts
+// while working on the project at the beginning
+// press 3 on the home menu to enter the game
+// controls are :   5
+//                1 2 3
+
 typedef struct snake_t {
 	int x;
 	int y;
@@ -53,7 +60,6 @@ int gameScene() {
 	int *food = 0;
 	srand(Calendar.now);
     while (!gameover) {
-		// Delay(5000000);
 		Delay(3000000);
 		switch (Keypad.key) {
 			case 1:
@@ -86,12 +92,11 @@ int gameScene() {
 				snake.x = snake.x - 1;
 				break;
 		}
-        for (Snake *s = snake.next; s != 0; s = s->next) {
+        for (Snake *s = snake.next; s != 0; s = s->next)
             if (snake.x == s->x && snake.y == s->y) {
                 Display.printfAt((int[2]){(DISPLAY_WIDTH/2)-6, DISPLAY_HEIGHT/2}, " GAME OVER ");
                 gameover = 1;
             }
-        }
 		if (snake.x < 0 || snake.x >= DISPLAY_WIDTH || snake.y < 0 || snake.y >= DISPLAY_HEIGHT) {
 			Display.printfAt((int[2]){(DISPLAY_WIDTH/2)-6, DISPLAY_HEIGHT/2}, " GAME OVER ");
 			gameover = 1;
@@ -100,9 +105,8 @@ int gameScene() {
 			food = 0;
 			snakeIncrease(&snake);
 		}
-		for (Snake *s = snake.next; s != 0; s = s->next) {
+		for (Snake *s = snake.next; s != 0; s = s->next)
 			Display.printfAt((int[2]){s->x, s->y}, "#");
-		}
 		Display.printfAt((int[2]){snake.x, snake.y}, "O");
     }
 	while(Keypad.key != 11);

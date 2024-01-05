@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#define IDLE 0
+#define READING 1
+#define READY 2
+
 typedef struct {
     int temp;
     int light;
@@ -25,6 +29,7 @@ typedef struct {
 extern master Master;
 
 void Delay(int time);
+void handle();
 
 #define PIOC_ESR (AT91_CAST(AT91_REG *) 0x400E12C0) // PIOC Edge Select Register
 #define PIOC_AIMER (AT91_CAST(AT91_REG *) 0x400E12B0) // PIOC Additional Interrupt Modes Enable Register

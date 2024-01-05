@@ -12,6 +12,6 @@ int gameScene();
 
 int settingsScene();
 
-static int (*screens[])(void) = {homeScene, recordingsScene, settingsScene, gameScene};
+static int (*screens[])(void) = {homeScene, recordingsScene, settingsScene, gameScene}; // add new scenes here
 
 static int currentScreen = 0;

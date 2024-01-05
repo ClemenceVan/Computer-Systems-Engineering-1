@@ -18,7 +18,7 @@ void InitTimer(int interval, void (*callback)(void)) {
     *PIO_AIMER = (1 << 1);
     *PIO_IFER = (1 << 1);
     *PIO_DIFSR = (1 << 1);
-    SysTick_Config((SystemCoreClock / 10)); // 10ds
+    SysTick_Config((SystemCoreClock / 10));
 }
 
 timer Timer = {

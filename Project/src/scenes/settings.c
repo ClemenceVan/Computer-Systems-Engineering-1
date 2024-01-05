@@ -10,9 +10,8 @@ void calendarSettings() {
 	int ticks = 0;
 	char *buffer = Calendar.toString(Calendar.getNow());
 	Display.printfAt((int[2]){CENTER_X - 12, CENTER_Y - 2}, "+---------------------+");
-	for (int i = 1; i < 5; i++) {
+	for (int i = 1; i < 5; i++)
 		Display.printfAt((int[2]){CENTER_X - 12, CENTER_Y - 2 + i}, "|                     |");
-	}
 	Display.printfAt((int[2]){CENTER_X - 10, CENTER_Y}, buffer);
 	Display.printfAt((int[2]){CENTER_X - 12, CENTER_Y + 2}, "+---------------------+");
 	Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[0]Back [*]Next [#]Previous");
