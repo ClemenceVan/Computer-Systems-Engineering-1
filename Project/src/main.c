@@ -64,20 +64,6 @@ void init(void) {
 void main(void) {
 	init();
 
-	// For buttons, to be cleaned up PROBABLY NOT USED, TO BE TESTED BEFORE REMOVING
-    // *AT91C_PMC_PCER = (1 << 14);
-	// *AT91C_PIOD_PER = 1 << 1 | 1 << 9;
-
-	// *AT91C_PIOD_ODR = 1 << 1 | 1 << 9;
-    // *AT91C_PIOD_PPUER = 1 << 1 | 1 << 9;
-
-    // *AT91C_PIOD_ISR;
-    // NVIC_ClearPendingIRQ(PIOD_IRQn);
-    // NVIC_SetPriority(PIOD_IRQn, 0);
-    // NVIC_EnableIRQ(PIOD_IRQn);
-    
-    // *AT91C_PIOD_IER = 1 << 1 | 1 << 9;
-
 	Calendar.setDateTime((Date) {
 			.day = 11,
 			.month = 1,
@@ -111,14 +97,3 @@ void main(void) {
 
 	while(1) currentScreen = switchScreen(currentScreen);
 }
-
-/*
-	for the report, thing that couldve been aded:
-		- more extensive memory management
-		- led messages for indicating errors, for better debugging
-		- more extensive error handling
-		- more extensive testing
-
-	to precise : 
-		- Date struct is used to store the current date and time, and is used to store the date and time of a recording
-*/

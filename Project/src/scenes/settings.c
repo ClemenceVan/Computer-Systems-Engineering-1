@@ -14,7 +14,9 @@ void calendarSettings() {
 		Display.printfAt((int[2]){CENTER_X - 12, CENTER_Y - 2 + i}, "|                     |");
 	Display.printfAt((int[2]){CENTER_X - 10, CENTER_Y}, buffer);
 	Display.printfAt((int[2]){CENTER_X - 12, CENTER_Y + 2}, "+---------------------+");
-	Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[0]Back [*]Next [#]Previous");
+	Display.printfAt((int[2]){0, DISPLAY_HEIGHT - 2}, "[#] start of line to cancel");
+	Display.printfAt((int[2]){0, DISPLAY_HEIGHT - 1}, "[*] end of line to save");
+	Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[#]Previous [*]Next");
 	while(1) {
 		ticks++;
 		if (ticks > 3000000) {
@@ -119,7 +121,7 @@ void temperatureSettings() {
 	Display.printfAt((int[2]){0, DISPLAY_HEIGHT}, "[0]Save [*]Next [#]Prev. [8]Up [2]Down");
 	Display.printfAt((int[2]){CENTER_X - 12, CENTER_Y - 2}, "+---------------------+");
 	for (int i = 1; i < 5; i++) Display.printfAt((int[2]){CENTER_X - 12, CENTER_Y - 2 + i}, "|                     |");
-	Display.printfAt((int[2]){CENTER_X - 2 - lengths[pos], CENTER_Y}, "%d / %d", Master.params.tempLimits[0], Master.params.tempLimits[1]);
+	Display.printfAt((int[2]){CENTER_X - 1 - (lengths[pos] + 1), CENTER_Y}, "%d / %d", Master.params.tempLimits[0], Master.params.tempLimits[1]);
 	Display.printfAt((int[2]){CENTER_X - 12, CENTER_Y + 2}, "+---------------------+");
 	while (1) {
 		ticks++;
@@ -129,7 +131,7 @@ void temperatureSettings() {
 			cursor = malloc(sizeof(char) * (lengths[pos] + 1));
 			for (int i = 0; i < lengths[pos]; i++) cursor[i] = blink ? ' ' : '-';
 			cursor[lengths[pos]] = '\0';
-			Display.printfAt((int[2]){(CENTER_X - 1 - lengths[pos]) + (3 + lengths[0]) * pos, CENTER_Y + 1}, "%s", cursor);
+			Display.printfAt((int[2]){(CENTER_X - 1 - (lengths[0] + 1)) + (3 + lengths[0]) * pos, CENTER_Y + 1}, "%s", cursor);
 			blink = !blink;
 		}
 		if (Keypad.key) {
@@ -147,8 +149,8 @@ void temperatureSettings() {
 					if (Master.params.tempLimits[pos] > 99) Master.params.tempLimits[pos] = 99;
 					else if (Master.params.tempLimits[pos] < -99) Master.params.tempLimits[pos] = -99;
 					lengths[pos] = snprintf(NULL, 0, "%d", Master.params.tempLimits[pos]);
-					Display.printfAt((int[2]){CENTER_X - 6, CENTER_Y}, "          ");
-					Display.printfAt((int[2]){CENTER_X - 2 - lengths[pos], CENTER_Y}, "%d / %d", Master.params.tempLimits[0], Master.params.tempLimits[1]);
+					Display.printfAt((int[2]){CENTER_X - 9, CENTER_Y}, "             ");
+					Display.printfAt((int[2]){CENTER_X - 2 - lengths[0], CENTER_Y}, "%d / %d", Master.params.tempLimits[0], Master.params.tempLimits[1]);
 					break;
 				case 11:
 					return;

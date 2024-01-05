@@ -1,8 +1,6 @@
 #include "./servo.h"
 
-void setPos(int angle) // page 991 in datasheet
-{
-	printf("Setting servo to %d\n", angle);
+void setPos(int angle) { // page 991 in datasheet
 	if (angle < 0 || angle > 180)
 		angle = 0;
 	Servo.position = angle;

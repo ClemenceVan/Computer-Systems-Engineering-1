@@ -50,9 +50,9 @@ void handle() {
 			Master.flags.alert = malloc(sizeof(char) * 24); // freed in menu scene
 			strcpy(Master.flags.alert, temp > Master.params.tempLimits[0] ? "Temperature too high!" : "Temperature too low!");
 		}
-		if (elapsed > 100 || Master.params.fastMode) { // /!\ NEED TO MAKE SURE THIS CORRESPONDS TO 30 MINUTES
+		if (elapsed > 18000 || Master.params.fastMode) {
 			Calendar.addTemperature(temp);
-			elapsed = 0;
+			elapsed = elapsed > 100 ? elapsed - 100 : elapsed;
 		}
 		Temperature.start();
 		Master.flags.temp = READING;
@@ -63,6 +63,7 @@ void handle() {
 		if (angle < 0) angle = -angle;
 		angle = angle % 180;
 		if (light[0] - light[1] < 0) angle = 180 - angle;
+		Servo.setPos(angle);
 		Light.enable();
 		Master.flags.light = READING;
 	}

@@ -17,6 +17,7 @@ int homeScene() {
 			Display.printfAt((int[2]){0, 1}, "[*] to dismiss");
 			if (Keypad.key == 10) {
 				Keypad.key = 0;
+				blink = 0;
 				free(Master.flags.alert);
 				Master.flags.alert = NULL;
 				*AT91C_PIOB_CODR = 1 << 27;
