@@ -9,7 +9,7 @@
 
 typedef struct {
     void (*init)(void);
-    float (*get)(void);
+    float *(*get)(void);
     void (*enable)(void);
     void (*disable)(void);
 } lightsensor;

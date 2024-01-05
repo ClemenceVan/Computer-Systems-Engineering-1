@@ -40,8 +40,8 @@ void TC0_Handler(void) {
 }
 
 void ADC_Handler(void) {
-	Master.flags.light = 1;
 	Light.disable();
+	Master.flags.light = READY;
 }
 
 int calendarScene() {
@@ -97,18 +97,17 @@ void handle() {
 		default:
 			break;
 	}
+	if (Master.flags.light) {
+		float *light = Light.get();
 
-	// if (Master.flags.temp != IDLE) {
-	// 	if (Master.flags.temp == READY) {
-	// 		// TBD
-	// 	}
-	// 	else if (Master.flags.temp == AUTO_READY) {
-	// 		Display.printfAt((int[2]){0, 1}, "Latest Recorded temp: %.2f", Temperature.get());
-	// 	}
-	// 	Master.flags.temp = IDLE;
-	// 	Temperature.disable();
-	// }
-	// Display.printfAt((int[2]){DISPLAY_WIDTH - 19, 0}, Calendar.toString(Calendar.getNow()));
+		int angle = (int)(light[0] - light[1]);
+		if (angle < 0) angle = -angle;
+		angle = angle % 180;
+		if (light[0] - light[1] < 0) angle = 180 - angle;
+		printf("%d %d\n", (int)light[0], (int)light[1]);
+		Light.enable();
+		Master.flags.light = READING;
+	}
 }
 
 void init(void) {
@@ -121,15 +120,14 @@ void init(void) {
 
 	// Enable peripherals pins
 	Keypad.init();
-	// Servo.init();
+	Servo.init();
 	Display.init();
 	Temperature.init();
-	// Light.init();
+	Light.init();
 
-	Temperature.enable();
 	Temperature.start();
 	Timer.init(10, handle);
-	// Light.enable();
+	Light.enable();
 	Display.enable();
 	Display.clear();
 
